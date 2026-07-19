@@ -149,6 +149,7 @@ activemq-data/
 
 # Environments
 .env
+.env.local
 .envrc
 .venv
 env/
@@ -216,3 +217,25 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ---------------------------------------------------------------------------
+# Next.js / Vercel frontend (frontend/)
+# ---------------------------------------------------------------------------
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+
+# Local / production env files for the frontend (kept OUT of version control).
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.production.local
+frontend/.env.test.local
+
+# Next.js type-checker output.
+frontend/next-env.d.ts.bak
+
+# Vercel CLI metadata.
+.vercel/
+.freebuff/

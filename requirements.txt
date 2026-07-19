@@ -1,0 +1,13 @@
+# Runtime dependencies for the AI mock-interview LiveKit agent.
+# Install with:  pip install -r requirements.txt
+#                # or, preferred:  uv pip install -r requirements.txt
+
+# LiveKit Agents framework + the Tavus virtual-avatar plugin.
+livekit-agents[tavus]~=1.5
+
+# Loads LiveKit / Tavus credentials from `.env.local` / `.env`.
+python-dotenv>=1.0
+
+# Test framework (see tests/test_state_machine.py).
+pytest>=8.0
+pytest-asyncio>=0.23

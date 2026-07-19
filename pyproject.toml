@@ -1,0 +1,31 @@
+[project]
+name = "ai-mock-interview"
+version = "0.1.0"
+description = "AI mock-interview agent powered by LiveKit Agents and a Tavus virtual avatar."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "AI Mock Interview" },
+]
+keywords = ["livekit", "agents", "voice-ai", "tavus", "avatar", "interview"]
+
+dependencies = [
+    # LiveKit Agents framework with the Tavus virtual-avatar plugin enabled.
+    "livekit-agents[tavus]~=1.5",
+    # Convenience for loading credentials from `.env.local` / `.env`.
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+# `uv sync --extra dev` / `pip install -e .[dev]` to enable the test runner.
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+]
+
+# NOTE: No [build-system] / [project.scripts] on purpose. This scaffold is an
+# application, not a library — run it directly:
+#     uv run agent.py dev   |   python agent.py dev   |   python agent.py start
+#     uv run pytest         |   python -m pytest       (requires the `dev` extra)
+# uv and pip will still resolve the [project].dependencies above.
