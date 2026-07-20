@@ -22,6 +22,8 @@ export default function HomePage() {
   const [token, setToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [connecting, setConnecting] = useState(false);
+  const [serverUrl, setServerUrl] = useState<string | null>(null);
+
 
   async function handleConnect(e: FormEvent) {
     e.preventDefault();
@@ -29,13 +31,14 @@ export default function HomePage() {
     setConnecting(true);
     try {
       const res = await fetch(
-        `/api/token?room=${encodeURIComponent(roomName)}&username=${encodeURIComponent(username)}`,
+        `/api/token?username=${encodeURIComponent(username)}`,
       );
       if (!res.ok) {
         throw new Error(`Token endpoint returned ${res.status}`);
       }
       const data = (await res.json()) as { token: string; url: string };
       setToken(data.token);
+      setServerUrl(data.url);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -48,7 +51,7 @@ export default function HomePage() {
       <main style={{ minHeight: '100vh', background: '#0b0d12', color: '#f0f2f8' }}>
         <LiveKitRoom
           token={token}
-          serverUrl={DEFAULT_LIVEKIT_URL}
+          serverUrl={serverUrl!}
           connect
           video
           audio
