@@ -28,6 +28,7 @@ Run modes:
 
 from __future__ import annotations
 
+import asyncio
 import os
 
 from dotenv import load_dotenv
@@ -131,8 +132,8 @@ async def entrypoint(ctx: JobContext) -> None:
     # adjust `USER_TURN_EVENT` in `interview.py`. Documented alternates:
     # `user_input_transcribed`, `conversation_item_added`.
     @session.on(USER_TURN_EVENT)
-    async def _on_user_turn(_event) -> None:
-        await orch.on_user_turn()
+    def _on_user_turn(_event) -> None:
+        asyncio.create_task(orch.on_user_turn())
 
 
 if __name__ == "__main__":

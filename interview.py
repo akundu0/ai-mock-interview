@@ -162,7 +162,7 @@ class Interviewer(Agent):
         """
         if not 0 <= index < len(self._stages):
             raise IndexError(f"Stage index out of range: {index}")
-        self.instructions = self._stages[index].instructions
+        await self.update_instructions(self._stages[index].instructions)
 
 
 # ---------------------------------------------------------------------------
@@ -274,7 +274,7 @@ class InterviewOrchestrator:
         # Re-bind the same agent instance — LiveKit re-reads its
         # `instructions` and rebuilds the chat context's system
         # message. No second agent is ever spun up.
-        await self._session.update_agent(self._agent)
+        self._session.update_agent(self._agent)
         # Reset bookkeeping for this stage.
         self._stage_index = index
         self._turn_count = 0
