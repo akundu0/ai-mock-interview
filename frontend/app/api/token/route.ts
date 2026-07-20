@@ -1,4 +1,4 @@
-import { AccessToken } from 'livekit-server-sdk';
+import { AccessToken, RoomConfiguration, RoomAgentDispatch } from "livekit-server-sdk";
 import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
@@ -21,7 +21,8 @@ export async function GET(req: Request): Promise<NextResponse> {
   }
 
   const { searchParams } = new URL(req.url);
-  const room = searchParams.get('room') || 'ai-mock-interview';
+  const room = searchParams.get('room') || `interview-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  
   const username =
     searchParams.get('username') ||
     `candidate-${Math.random().toString(36).slice(2, 8)}`;
@@ -37,6 +38,9 @@ export async function GET(req: Request): Promise<NextResponse> {
     canPublish: true,
     canSubscribe: true,
   });
+  at.roomConfig = new RoomConfiguration({
+  agents: [new RoomAgentDispatch({ agentName: "ai-mock-interview" })],
+});
 
   const token = await at.toJwt();
   return NextResponse.json({ token, url: livekitUrl, room, identity: username });
