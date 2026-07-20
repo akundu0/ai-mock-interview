@@ -41,7 +41,7 @@ from livekit.agents import (
     inference,
 )
 from livekit.plugins import tavus
-
+from livekit.plugins import openai as lk_openai
 from interview import (
     USER_TURN_EVENT,
     Interviewer,
@@ -86,7 +86,11 @@ async def entrypoint(ctx: JobContext) -> None:
     # catalog, which keeps lip-sync tight with the Tavus avatar.
     session = AgentSession(
         stt=inference.STT(model="deepgram/nova-3", language="multi"),
-        llm=inference.LLM(model="openai/gpt-4o-mini"),
+        llm=lk_openai.LLM(
+        model="llama-3.1-8b-instant",
+        base_url="https://api.groq.com/openai/v1",
+        api_key=os.environ.get("GROQ_API_KEY"),
+    ),
         tts=inference.TTS(model="cartesia/sonic-3"),
         turn_handling=TurnHandlingOptions(
             turn_detection=inference.TurnDetector(),
