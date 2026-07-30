@@ -66,6 +66,16 @@ def light_stages() -> list[StageConfig]:
             fallback_timeout_s=0.1,
             fallback_prompt="Stage 2 nudge.",
             max_turns=2,
+            transition_phrase="Stage 2 bridge phrase.",
+            hard_timeout_nudges=2,
+        ),
+        StageConfig(
+            name=Stage.CLOSING_FEEDBACK,
+            instructions="Stage 3 system prompt.",
+            opening_prompt="Stage 3 opener.",
+            fallback_timeout_s=0.1,
+            fallback_prompt="Stage 3 nudge.",
+            max_turns=2,
             transition_phrase="",  # final stage — no bridge utterance
             hard_timeout_nudges=2,
         ),
@@ -238,6 +248,42 @@ async def test_hard_timeout_force_advances_after_n_nudges(
 
 
 @pytest.mark.asyncio
+async def test_hard_timeout_advances_through_all_three_stages(
+    mock_session, light_stages, agent,
+):
+    """Hard-timeout forced advances walk through all 3 stages and
+    eventually mark the orchestrator as completed."""
+    orch = InterviewOrchestrator(mock_session, agent, light_stages)
+    await orch.start()
+    mock_session.generate_reply.reset_mock()
+
+    # Force advance Stage 1 → Stage 2
+    orch._last_user_input_at = time.monotonic() - 10.0
+    await orch._tick_watchdog_once()  # nudge 1
+    orch._last_user_input_at = time.monotonic() - 10.0
+    advanced = await orch._tick_watchdog_once()  # nudge 2 → force advance
+    assert advanced is True
+    assert orch.current_stage.name == Stage.PAST_EXPERIENCE
+
+    mock_session.generate_reply.reset_mock()
+
+    # Force advance Stage 2 → Stage 3
+    orch._last_user_input_at = time.monotonic() - 10.0
+    await orch._tick_watchdog_once()  # nudge 1
+    orch._last_user_input_at = time.monotonic() - 10.0
+    advanced = await orch._tick_watchdog_once()  # nudge 2 → force advance
+    assert advanced is True
+    assert orch.current_stage.name == Stage.CLOSING_FEEDBACK
+
+    # Stage 3 opening prompt was generated.
+    opening_calls = [
+        c for c in mock_session.generate_reply.call_args_list
+        if c.kwargs.get("instructions") == light_stages[2].opening_prompt
+    ]
+    assert len(opening_calls) == 1
+
+
+@pytest.mark.asyncio
 async def test_user_turn_resets_nudge_counter(
     mock_session, light_stages, agent,
 ):
@@ -324,10 +370,11 @@ async def test_advancing_past_final_stage_marks_completed(
     orch = InterviewOrchestrator(mock_session, agent, light_stages)
     await orch.start()
 
-    await orch.force_advance()  # → Stage 1 (final)
+    await orch.force_advance()  # → Stage 2 (past experience)
+    await orch.force_advance()  # → Stage 3 (closing/feedback — final)
     await orch.force_advance()  # → completed
 
-    assert orch.current_stage.name == Stage.PAST_EXPERIENCE
+    assert orch.current_stage.name == Stage.CLOSING_FEEDBACK
     assert orch.completed is True
 
 
@@ -348,3 +395,14 @@ async def test_watchdog_is_rearmed_on_stage_advance(
 
     assert orch._watchdog_task is not None
     assert orch._watchdog_task is not first_watchdog
+
+
+@pytest.mark.asyncio
+async def test_closing_feedback_stage_exists_in_production_stages():
+    """The production STAGES list includes the Closing/Feedback stage."""
+    assert len(STAGES) == 3
+    assert STAGES[2].name == Stage.CLOSING_FEEDBACK
+    assert STAGES[2].transition_phrase == ""  # final — no transition
+    # Feedback stage has a meaningful system prompt
+    assert "feedback" in STAGES[2].instructions.lower()
+    assert "strengths" in STAGES[2].instructions.lower()

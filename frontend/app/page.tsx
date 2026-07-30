@@ -156,8 +156,7 @@ function LandingPage({ onStart }: { onStart: () => void }) {
 
           <p className="text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed">
             Get instant practice for software engineering interviews. A digital-human
-            interviewer guides you through self-introduction and past-experience
-            stages with real-time voice conversation.
+            interviewer guides you through self-introduction, past-experience, and personalized feedback stages with real-time voice conversation.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -187,7 +186,7 @@ function LandingPage({ onStart }: { onStart: () => void }) {
             <FeatureCard
               icon={<Brain className="h-5 w-5" />}
               title="Multi-Stage Interview"
-              description="The AI runs a structured flow: self-introduction, then deep-dive into your past projects with targeted follow-ups."
+              description="The AI runs a structured 3-stage flow: self-introduction, deep-dive into past projects, then personalized feedback on your performance."
             />
             <FeatureCard
               icon={<Timer className="h-5 w-5" />}
@@ -346,7 +345,7 @@ function ConnectView({
               <MessageSquare className="h-4 w-4 mt-0.5 shrink-0" />
               <p>
                 Your microphone will be used for the interview. Camera is not required.
-                The AI interviewer will guide you through two stages.
+                The AI interviewer will guide you through three stages.
               </p>
             </div>
           </div>
@@ -363,6 +362,7 @@ function ConnectView({
 const STAGES = [
   { label: 'Self-Introduction', description: 'Name, role & career snapshot' },
   { label: 'Past Experience', description: 'Deep-dive into a recent project' },
+  { label: 'Feedback', description: 'Strengths & areas for improvement' },
 ];
 
 function InterviewRoom({
@@ -426,17 +426,29 @@ function InterviewRoom({
         });
 
         // Heuristic: detect stage transition from agent speech
-        if (
-          isAgent &&
-          currentStage === 0 &&
-          (text.toLowerCase().includes('past experience') ||
-            text.toLowerCase().includes('recent project') ||
-            text.toLowerCase().includes('walk me through') ||
-            text.toLowerCase().includes('stage 2') ||
-            text.toLowerCase().includes("let's transition") ||
-            text.toLowerCase().includes('dive deeper'))
-        ) {
-          setCurrentStage(1);
+        if (isAgent) {
+          const lower = text.toLowerCase();
+          if (
+            currentStage === 0 &&
+            (lower.includes('past experience') ||
+              lower.includes('recent project') ||
+              lower.includes('walk me through') ||
+              lower.includes('stage 2') ||
+              lower.includes("let's transition") ||
+              lower.includes('dive deeper'))
+          ) {
+            setCurrentStage(1);
+          } else if (
+            currentStage === 1 &&
+            (lower.includes('feedback') ||
+              lower.includes('wrap things up') ||
+              lower.includes('strengths') ||
+              lower.includes('areas for improvement') ||
+              lower.includes('stage 3') ||
+              lower.includes('closing'))
+          ) {
+            setCurrentStage(2);
+          }
         }
       }
     };

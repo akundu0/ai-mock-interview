@@ -47,6 +47,7 @@ USER_TURN_EVENT = "user_speech_committed"
 class Stage(enum.Enum):
     SELF_INTRODUCTION = "self_introduction"
     PAST_EXPERIENCE = "past_experience"
+    CLOSING_FEEDBACK = "closing_feedback"
 
 
 @dataclasses.dataclass(frozen=True)
@@ -67,7 +68,7 @@ STAGES: List[StageConfig] = [
     StageConfig(
         name=Stage.SELF_INTRODUCTION,
         instructions=(
-            "You are conducting STAGE 1 of 2 of a mock interview: "
+            "You are conducting STAGE 1 of 3 of a mock interview: "
             "SELF-INTRODUCTION. Be warm, conversational, and concise. Ask the "
             "candidate to introduce themselves — name, current role, and a "
             "quick career snapshot — and add at most ONE light follow-up. "
@@ -96,7 +97,7 @@ STAGES: List[StageConfig] = [
     StageConfig(
         name=Stage.PAST_EXPERIENCE,
         instructions=(
-            "You are conducting STAGE 2 of 2 of a mock interview: "
+            "You are conducting STAGE 2 of 3 of a mock interview: "
             "PAST EXPERIENCE. Ask the candidate to walk through a recent "
             "project in detail — scope, their specific contributions, "
             "technical decisions, challenges, and outcomes. Probe depth with "
@@ -117,7 +118,40 @@ STAGES: List[StageConfig] = [
             "as you'd like, including your specific contributions.'"
         ),
         max_turns=6,
-        transition_phrase="",  # final stage
+        transition_phrase=(
+            "Great discussion on your project experience. Let me now give "
+            "you some quick feedback and wrap things up."
+        ),
+        hard_timeout_nudges=2,
+    ),
+    StageConfig(
+        name=Stage.CLOSING_FEEDBACK,
+        instructions=(
+            "You are conducting STAGE 3 of 3 of a mock interview: "
+            "CLOSING AND FEEDBACK. Summarize the candidate's performance "
+            "across both previous stages. Highlight 2-3 specific strengths "
+            "you observed — concrete things they did well in their self-"
+            "introduction and project walkthrough. Then offer 1-2 "
+            "actionable areas for improvement with specific suggestions "
+            "(e.g. 'quantify the impact of your project' or 'lead with "
+            "the technical challenge before the solution'). End by "
+            "thanking them warmly and encouraging them. Keep spoken "
+            "replies concise and free of markdown, emojis, and unusual "
+            "punctuation."
+        ),
+        opening_prompt=(
+            "Give the candidate structured feedback: highlight 2-3 strengths "
+            "from their introduction and project discussion, then suggest "
+            "1-2 specific areas for improvement. End with encouragement."
+        ),
+        fallback_timeout_s=60.0,
+        fallback_prompt=(
+            "The candidate is quiet. Ask if they have any questions about "
+            "the feedback or if there's anything else they'd like to "
+            "practice."
+        ),
+        max_turns=4,
+        transition_phrase="",  # final stage — no transition
         hard_timeout_nudges=2,
     ),
 ]

@@ -1,9 +1,11 @@
 # ai-mock-interview
 
+[![CI](https://github.com/akundu0/ai-mock-interview/actions/workflows/ci.yml/badge.svg)](https://github.com/akundu0/ai-mock-interview/actions/workflows/ci.yml)
+
 A voice-AI mock-interview agent built on
 [LiveKit Agents](https://docs.livekit.io/agents/) with a
 [Tavus](https://www.tavus.io/) virtual avatar (Phoenix-3 PRO). The
-agent runs **two interview stages inside a single `AgentSession`**,
+agent runs **three interview stages inside a single `AgentSession`**,
 orchestrated by a tiny state machine that keeps the LLM in ONE agent
 instance and mutates its `instructions` at stage boundaries.
 
@@ -140,6 +142,43 @@ See [`frontend/README.md`](./frontend/README.md) — the short version:
 
 ## Architecture
 
+### System overview
+
+```mermaid
+flowchart LR
+    subgraph Browser["Browser (Next.js)"]
+        UI["Landing Page\nConnect Form\nInterview Room"]
+    end
+
+    subgraph LiveKit Cloud
+        Room["LiveKit Room"]
+    end
+
+    subgraph Agent["Python Agent"]
+        VP["Voice Pipeline"]
+        FSM["InterviewOrchestrator\n(FSM)"]
+        Interviewer["Interviewer Agent\n(single instance)"]
+    end
+
+    subgraph External APIs
+        STT["Deepgram\nNova-3 STT"]
+        LLM["Groq\nLlama 3.1 LLM"]
+        TTS["Cartesia\nSonic-3 TTS"]
+        Avatar["Tavus\nPhoenix-3 PRO"]
+    end
+
+    UI -- "WebRTC audio" --> Room
+    Room -- "audio stream" --> VP
+    VP -- "speech → text" --> STT
+    STT -- "transcript" --> FSM
+    FSM -- "stage instructions" --> Interviewer
+    Interviewer -- "prompt" --> LLM
+    LLM -- "response text" --> TTS
+    TTS -- "synthesized audio" --> Room
+    Avatar -- "lip-synced video" --> Room
+    Room -- "video + audio" --> UI
+```
+
 ### Single-agent invariant (step 3)
 
 There is exactly one `Agent` instance — `Interviewer` — running
@@ -178,8 +217,9 @@ advance is also wrapped in `asyncio.Lock` so concurrent
 
 | Stage | `fallback_timeout_s` | `max_turns` | `transition_phrase` |
 |---|---|---|---|
-| Self-introduction | 45 s | 4 | "Thanks for the intro… let's transition to Stage 2…" |
-| Past experience  | 90 s | 6 | *(final — no transition)* |
+| Self-introduction | 45 s | 4 | "Thanks for the intro… let's dive into your experience." |
+| Past experience  | 90 s | 6 | "Great discussion… let me give you feedback." |
+| Closing / Feedback | 60 s | 4 | *(final — no transition)* |
 
 ### Test coverage (step 5)
 
@@ -209,8 +249,8 @@ advance is also wrapped in `asyncio.Lock` so concurrent
 
 - Tune `min_interruption_words` / VAD thresholds to taste — the
   defaults are conservative for a slow, smooth interview cadence.
-- Add Stage 3 (closing / wrap-up) by appending a `StageConfig` to
-  `interview.STAGES`. The orchestrator picks it up with no other
-  changes.
 - Wire recording (LiveKit Egress + per-stage transcript dumps)
   so each interview produces an asynchronous-replay artifact.
+- Add additional stages (e.g. system design, behavioral) by
+  appending a `StageConfig` to `interview.STAGES`. The orchestrator
+  picks it up with no other changes.
