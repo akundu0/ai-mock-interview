@@ -232,12 +232,12 @@ async def test_hard_timeout_force_advances_after_n_nudges(
         if c.kwargs.get("instructions") == light_stages[0].transition_phrase
     ]
     assert len(transition_calls) == 1
-    # Fallback was generated exactly once (before the bridge).
+    # Fallback was generated on each nudge tick (twice total).
     fallback_calls = [
         c for c in mock_session.generate_reply.call_args_list
         if c.kwargs.get("instructions") == light_stages[0].fallback_prompt
     ]
-    assert len(fallback_calls) == 1
+    assert len(fallback_calls) == 2
     # The Stage 2 opening prompt was generated once on entry.
     opening_calls = [
         c for c in mock_session.generate_reply.call_args_list
