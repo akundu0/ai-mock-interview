@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+*.egg-info/
+
+# Node
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
+# Env files (secrets — passed via docker-compose env_file)
+.env
+.env.local
+frontend/.env
+frontend/.env.local
+
+# Git / IDE
+.git/
+.gitignore
+.vscode/
+.idea/
+
+# Lockfiles not needed in containers
+uv.lock
+
+# Docs (not needed at runtime)
+docs/
+*.md
+!frontend/README.md

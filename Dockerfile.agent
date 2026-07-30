@@ -1,0 +1,23 @@
+# --------------------------------------------------------------------------
+# AI Mock Interview — Python agent (LiveKit + Tavus)
+# --------------------------------------------------------------------------
+FROM python:3.12-slim AS agent
+
+WORKDIR /app
+
+# Install system deps for LiveKit agent plugins (audio processing).
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gcc libffi-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install Python deps first (layer cache).
+COPY requirements.txt pyproject.toml ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application source.
+COPY agent.py interview.py ./
+COPY tests/ tests/
+
+# LiveKit agent production mode.
+ENTRYPOINT ["python", "agent.py"]
+CMD ["start"]

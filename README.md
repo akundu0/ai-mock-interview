@@ -15,9 +15,12 @@ from any browser.
 
 ```
 .
-├── .env.example               # Credential template (cp → .env.local)
+├── .env.example               # Credential template (cp → .env)
 ├── .gitignore
 ├── README.md                   # ← you are here
+├── docker-compose.yml          # Single-command full-stack launch
+├── Dockerfile.agent            # Python agent container
+├── Dockerfile.frontend         # Next.js frontend container
 ├── agent.py                    # LiveKit worker entrypoint
 ├── interview.py                # Interviewer Agent + FSM orchestrator
 ├── pyproject.toml              # Python project metadata & dependencies
@@ -30,12 +33,16 @@ from any browser.
 └── frontend/                   # Vercel-deployable Next.js client
     ├── .env.example
     ├── README.md
+    ├── tailwind.config.ts      # Tailwind v3 dark theme + animations
+    ├── postcss.config.mjs
     ├── next.config.js
     ├── package.json
     ├── tsconfig.json
     └── app/
-        ├── layout.tsx
-        ├── page.tsx
+        ├── globals.css         # Tailwind directives
+        ├── layout.tsx          # Root layout — Inter font, dark theme, SEO
+        ├── page.tsx            # Landing page + connect form + interview room
+        ├── utils/cn.ts         # Tailwind class merge utility
         └── api/
             └── token/
                 └── route.ts    # Server-minted LiveKit access tokens
@@ -51,7 +58,7 @@ artifacts (`.venv/`, `__pycache__/`, `node_modules/`, etc.) are excluded.
 | `agent.py` | LiveKit worker entrypoint — voice pipeline + Tavus avatar + orchestrator wiring |
 | `interview.py` | Single `Interviewer` Agent + `InterviewOrchestrator` FSM (stage state variable + time-based fallback watchdog) |
 | `tests/test_state_machine.py` | pytest-asyncio tests that lock down the FSM behaviour |
-| `frontend/` | Vercel-deployable Next.js app — LiveKit React components + server-minted access tokens |
+| `frontend/` | Vercel-deployable Next.js app — Tailwind dark theme, landing page, live transcript, stage indicator, LiveKit React components + server-minted access tokens |
 | `docs/API_KEYS.md` | Step-by-step walkthrough: LiveKit Cloud + Tavus API key + Phoenix-3 PRO + LiveKit-transport persona |
 | `pyproject.toml` / `requirements.txt` | Python deps (runtime + `[dev]` extra) |
 
@@ -92,11 +99,28 @@ uv run pytest                 # or:  python -m pytest
 
 ## Running the browser demo
 
+### Option A — Docker (recommended, single command)
+
 ```bash
-# 1. In one terminal: the agent
+# 1. Copy and fill in credentials
+cp .env.example .env
+
+# 2. Build and run both services
+docker compose up --build
+
+# → open http://localhost:3000
+```
+
+This starts the Python agent and the Next.js frontend together.
+To stop: `docker compose down`.
+
+### Option B — Manual (two terminals)
+
+```bash
+# Terminal 1: the agent
 uv run agent.py dev
 
-# 2. In another terminal: the Next.js frontend
+# Terminal 2: the Next.js frontend
 cd frontend
 npm install
 npm run dev

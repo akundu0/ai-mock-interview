@@ -1,0 +1,44 @@
+# --------------------------------------------------------------------------
+# AI Mock Interview — run the full stack with `docker compose up`
+#
+# 1. Copy `.env.example` to `.env` and fill in your API keys.
+# 2. Run:  docker compose up --build
+# 3. Open: http://localhost:3000
+# --------------------------------------------------------------------------
+
+services:
+  # LiveKit voice-AI agent (Python) — connects to LiveKit Cloud + Tavus.
+  agent:
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
+    env_file: .env
+    environment:
+      - LIVEKIT_URL=${LIVEKIT_URL}
+      - LIVEKIT_API_KEY=${LIVEKIT_API_KEY}
+      - LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}
+      - TAVUS_API_KEY=${TAVUS_API_KEY}
+      - TAVUS_FACE_ID=${TAVUS_FACE_ID}
+      - TAVUS_REPLICA_ID=${TAVUS_REPLICA_ID}
+      - TAVUS_PERSONA_ID=${TAVUS_PERSONA_ID}
+      - TAVUS_AVATAR_NAME=${TAVUS_AVATAR_NAME:-Tavus-avatar-agent}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+    restart: unless-stopped
+
+  # Next.js frontend — serves the browser UI + /api/token endpoint.
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        NEXT_PUBLIC_LIVEKIT_URL: ${LIVEKIT_URL}
+    ports:
+      - "3000:3000"
+    environment:
+      - LIVEKIT_URL=${LIVEKIT_URL}
+      - LIVEKIT_API_KEY=${LIVEKIT_API_KEY}
+      - LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}
+      - NEXT_PUBLIC_LIVEKIT_URL=${LIVEKIT_URL}
+    restart: unless-stopped
+    depends_on:
+      - agent

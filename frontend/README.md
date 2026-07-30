@@ -7,6 +7,7 @@ avatar in real-time video. Deployable to Vercel in three commands.
 ## Stack
 
 - **Next.js 14** (App Router, React Server Components)
+- **Tailwind CSS** + **Lucide icons** for a modern, dark-themed UI
 - **`@livekit/components-react`** for the room UI
 - **`livekit-server-sdk`** for minting access tokens server-side
   (so your `LIVEKIT_API_SECRET` never reaches the browser)
@@ -64,27 +65,30 @@ still interview fine).
 ```
 frontend/
 ├── app/
-│   ├── layout.tsx         # Root layout — imports LiveKit styles
-│   ├── page.tsx           # Connect form + LiveKit room stage
+│   ├── globals.css        # Tailwind directives + custom scrollbar styles
+│   ├── layout.tsx         # Root layout — Inter font, dark theme, SEO metadata
+│   ├── page.tsx           # Landing page, connect form, interview room (3 views)
+│   ├── utils/cn.ts        # Tailwind class merge utility
 │   └── api/token/route.ts # Serverless token minter
+├── tailwind.config.ts     # Tailwind v3 config — custom dark theme + animations
+├── postcss.config.mjs
 ├── next.config.js
 ├── package.json
 ├── tsconfig.json
-└── frontend/.env.example  # Local-only env vars (don't commit secrets)
+└── .env.example           # Local-only env vars (don't commit secrets)
 ```
 
 ## Demo flow
 
-1. Open the deployed URL.
-2. Enter a room name (any string — the agent joins "ai-mock-interview"
-   by default; enter that to match).
-3. Click **Start interview**. The browser fetches a server-minted
+1. Open the deployed URL — a landing page describes the project.
+2. Click **Start Interview** → enter your name on the connect screen.
+3. Click **Start Interview** again. The browser fetches a server-minted
    token from `/api/token`, connects to the LiveKit room, and the
-   agent joins as a participant with the Tavus avatar publishing its
-   video track.
-4. The interviewer greets you, runs the
+   agent joins with the Tavus avatar publishing its video track.
+4. The interview room shows: the avatar video, a **stage indicator**
+   (Self-Introduction → Past Experience), a **live transcript**
+   sidebar, and an elapsed timer.
+5. The interviewer greets you, runs the
    **self-introduction → past-experience** flow with stage
    transitions, and ends gracefully.
-5. Click **Leave** to disconnect; the stage swap / transition logic
-   stays clean because `onDisconnected` clears the token and the
-   room tears down.
+6. Click **Leave** to disconnect and return to the landing page.
