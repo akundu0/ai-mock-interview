@@ -85,12 +85,12 @@ async def entrypoint(ctx: JobContext) -> None:
     # LiveKit Inference — zero external API keys beyond LiveKit Cloud.
     # Cartesia Sonic-3 is the lowest-latency TTS in the inference
     # catalog, which keeps lip-sync tight with the Tavus avatar.
-    session = AgentSession(
+    session: AgentSession = AgentSession(
         stt=inference.STT(model="deepgram/nova-3", language="multi"),
         llm=lk_openai.LLM(
         model="llama-3.1-8b-instant",
         base_url="https://api.groq.com/openai/v1",
-        api_key=os.environ.get("GROQ_API_KEY"),
+        api_key=os.environ["GROQ_API_KEY"],
     ),
         tts=inference.TTS(model="cartesia/sonic-3"),
         turn_handling=TurnHandlingOptions(
@@ -131,7 +131,7 @@ async def entrypoint(ctx: JobContext) -> None:
     # committed by VAD + STT. If your patch uses different naming,
     # adjust `USER_TURN_EVENT` in `interview.py`. Documented alternates:
     # `user_input_transcribed`, `conversation_item_added`.
-    @session.on(USER_TURN_EVENT)
+    @session.on(USER_TURN_EVENT)  # type: ignore[arg-type]
     def _on_user_turn(_event) -> None:
         asyncio.create_task(orch.on_user_turn())
 
