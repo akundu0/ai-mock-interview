@@ -31,14 +31,13 @@ from unittest.mock import AsyncMock
 import pytest
 
 from interview import (
+    STAGES,
     USER_TURN_EVENT,
     Interviewer,
     InterviewOrchestrator,
     Stage,
     StageConfig,
-    STAGES,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fixtures

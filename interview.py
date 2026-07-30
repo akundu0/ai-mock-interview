@@ -26,7 +26,6 @@ from typing import List, Optional
 
 from livekit.agents import Agent, AgentSession
 
-
 # ---------------------------------------------------------------------------
 # Module-level constants
 # ---------------------------------------------------------------------------

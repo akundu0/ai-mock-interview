@@ -32,7 +32,6 @@ import asyncio
 import os
 
 from dotenv import load_dotenv
-
 from livekit import agents
 from livekit.agents import (
     AgentServer,
@@ -41,13 +40,14 @@ from livekit.agents import (
     TurnHandlingOptions,
     inference,
 )
-from livekit.plugins import tavus
 from livekit.plugins import openai as lk_openai
+from livekit.plugins import tavus
+
 from interview import (
+    STAGES,
     USER_TURN_EVENT,
     Interviewer,
     InterviewOrchestrator,
-    STAGES,
 )
 
 # Load credentials from `.env.local` (preferred, gitignored) and fall
