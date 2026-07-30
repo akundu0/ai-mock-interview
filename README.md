@@ -129,16 +129,43 @@ npm run dev
 # → open http://localhost:3000
 ```
 
-## Deploying the frontend to Vercel
+## Deployment
 
-See [`frontend/README.md`](./frontend/README.md) — the short version:
+### Frontend → Vercel (free)
+
+The Next.js frontend deploys to [Vercel's free tier](https://vercel.com/)
+with zero configuration beyond env vars:
 
 1. Push the repo to GitHub.
 2. Import `frontend/` as the project root in Vercel.
-3. Set **server** env vars (`LIVEKIT_URL`, `LIVEKIT_API_KEY`,
-   `LIVEKIT_API_SECRET`) and the **client** env var
-   (`NEXT_PUBLIC_LIVEKIT_URL`) in *Settings → Environment Variables*.
-4. Deploy.
+3. Set env vars in *Settings → Environment Variables*:
+
+   | Variable | Scope | Notes |
+   |---|---|---|
+   | `LIVEKIT_URL` | Server | `wss://your-project.livekit.cloud` |
+   | `LIVEKIT_API_KEY` | Server | From LiveKit Cloud |
+   | `LIVEKIT_API_SECRET` | Server | From LiveKit Cloud |
+   | `NEXT_PUBLIC_LIVEKIT_URL` | Client | Same as `LIVEKIT_URL` |
+
+4. Deploy. The landing page is live immediately.
+
+See [`frontend/README.md`](./frontend/README.md) for full details.
+
+### Agent → run locally for demos
+
+The Python agent needs a long-running process (WebSocket connection to
+LiveKit Cloud), which serverless platforms can't host. For demos and
+interviews, run it on your machine:
+
+```bash
+cp .env.example .env.local   # fill in API keys
+uv run agent.py dev           # connects to LiveKit Cloud
+```
+
+When the agent is running locally and the frontend is on Vercel, both
+connect to the same LiveKit Cloud room — the interview works end-to-end.
+When the agent is *not* running, the landing page is still live and
+showcases the project to anyone visiting the URL.
 
 ## Architecture
 

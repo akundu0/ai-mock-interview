@@ -86,9 +86,9 @@ frontend/
    token from `/api/token`, connects to the LiveKit room, and the
    agent joins with the Tavus avatar publishing its video track.
 4. The interview room shows: the avatar video, a **stage indicator**
-   (Self-Introduction → Past Experience), a **live transcript**
+   (Self-Introduction → Past Experience → Feedback), a **live transcript**
    sidebar, and an elapsed timer.
 5. The interviewer greets you, runs the
-   **self-introduction → past-experience** flow with stage
-   transitions, and ends gracefully.
+   **self-introduction → past-experience → closing feedback** flow
+   with stage transitions, and ends with personalized feedback.
 6. Click **Leave** to disconnect and return to the landing page.
